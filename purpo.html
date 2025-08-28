@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Do You Love Me? ❤️</title>
+  <style>
+    :root{
+      --bg:#0f172a;
+      --card:#111827cc;
+      --text:#e5e7eb;
+      --muted:#94a3b8;
+      --yes:#22c55e;
+      --no:#ef4444;
+      --accent:#f472b6;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif;
+      background: radial-gradient(1200px 1200px at 10% 10%, #1f2937 0%, #0b1222 40%, var(--bg) 70%);
+      color:var(--text);
+      display:grid; place-items:center; overflow:hidden;
+    }
+    .card{
+      width:min(92vw, 560px);
+      background:linear-gradient(180deg, #1f2937cc, #0b1222cc);
+      border:1px solid #33415599; backdrop-filter: blur(10px);
+      border-radius:24px; padding:28px; box-shadow:0 10px 40px #0008;
+      text-align:center; position:relative;
+      animation: fadeIn 1s ease-in-out;
+    }
+    h1{font-size:clamp(26px, 4vw, 36px); margin:6px 0 8px}
+    p.lead{color:var(--muted); margin:0 0 18px; font-size:clamp(14px, 2.4vw, 16px)}
+    .question{font-size:clamp(20px, 3.6vw, 28px); margin:12px 0 24px}
+
+    .btns{display:flex; gap:14px; justify-content:center; align-items:center; flex-wrap:wrap; position:relative}
+    button{
+      appearance:none; border:0; cursor:pointer; padding:12px 22px; font-weight:700;
+      border-radius:999px; transition: transform .08s ease, box-shadow .2s ease, background .2s ease, left .4s, top .4s;
+      box-shadow:0 8px 18px #0006; font-size:16px;
+    }
+    .yes{background:var(--yes); color:#052e16}
+    .no{background:var(--no); color:#fff; position:relative}
+    button:active{transform:scale(.96)}
+
+    .msg{margin:16px 0 0; min-height:28px; color:var(--accent); font-weight:600}
+
+    .hearts{position:absolute; inset:0; overflow:hidden; pointer-events:none}
+    .heart{position:absolute; font-size:16px; animation:float 4s linear forwards; opacity:.8}
+    @keyframes float{0%{transform:translateY(0) scale(.9)} 100%{transform:translateY(-140vh) scale(1.2); opacity:0}}
+
+    .confetti{position:fixed; inset:0; pointer-events:none}
+
+    @keyframes fadeIn {
+      from {opacity: 0; transform: scale(0.9);}
+      to {opacity: 1; transform: scale(1);}
+    }
+  </style>
+</head>
+<body>
+  <!-- Background Music -->
+  <audio id="bgMusic" autoplay loop>
+    <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+  </audio>
+
+  <div class="card" id="card">
+    <div class="hearts" id="hearts"></div>
+    <h1>💖 My Cheesy Little Proposal 💖</h1>
+    <p class="lead">“Tum meri duniya ho 🌍, meri muskaan ho 😊, aur meri sabse badi dua ho 🙏💘”</p>
+
+    <div class="question" id="question">Do you love me? 🥺💞</div>
+
+    <div class="btns" id="btns">
+      <button class="yes" id="yesBtn">Yes 💚</button>
+      <button class="no" id="noBtn">No 💔</button>
+    </div>
+
+    <div class="msg" id="msg"></div>
+  </div>
+
+  <canvas class="confetti" id="confetti"></canvas>
+
+  <script>
+    const yesBtn = document.getElementById('yesBtn');
+    const noBtn  = document.getElementById('noBtn');
+    const msg    = document.getElementById('msg');
+    const question = document.getElementById('question');
+    const btns   = document.getElementById('btns');
+    const hearts = document.getElementById('hearts');
+
+    let noClicks = 0;
+    let evasive = false;
+
+    function setMessage(text){
+      msg.textContent = text;
+    }
+
+    // Floating hearts
+    function spawnHeart(){
+      const h = document.createElement('div');
+      h.className = 'heart';
+      h.textContent = '💖';
+      const x = Math.random() * 100;
+      h.style.left = x + '%';
+      h.style.bottom = '-20px';
+      h.style.fontSize = (14 + Math.random()*16) + 'px';
+      hearts.appendChild(h);
+      setTimeout(()=> hearts.removeChild(h), 4000);
+    }
+    setInterval(spawnHeart, 700);
+
+    // Button swap
+    function swapButtons(){
+      btns.insertBefore(noBtn, yesBtn);
+    }
+
+    yesBtn.addEventListener('click', ()=>{
+      question.textContent = 'I knew it! 😍 I know you love me 💋💞';
+      setMessage('Bas yahi toh sunna tha! Tum meri hamesha ki mohabbat ho 💍❤️');
+      celebration();
+      yesBtn.disabled = true; noBtn.disabled = true;
+    });
+
+    noBtn.addEventListener('click', ()=>{
+      noClicks++;
+      if(noClicks === 1){
+        setMessage('Ek baar aur soch lo jaanu 😌💕');
+        swapButtons();
+      } else if(noClicks === 2){
+        setMessage('Dil todna buri baat hai 😤💔');
+        question.textContent = 'Sach bolo, tum mujhe chhod kar jaa hi nahi sakti 😏💫';
+        swapButtons();
+      } else if(noClicks === 3){
+        setMessage('Acha chalo mazak band karo 😒💝, ab No button pakadna impossible hai!');
+        question.textContent = 'Tum meri destiny ho 🌹✨';
+        makeNoEvasive();
+      }
+    });
+
+    // Evasive No button
+    function makeNoEvasive(){
+      evasive = true;
+      const moveAway = ()=>{
+        if(!evasive) return;
+        const rect = btns.getBoundingClientRect();
+        const nrect = noBtn.getBoundingClientRect();
+        const pad = 6;
+        const maxX = rect.width - nrect.width - pad;
+        const maxY = rect.height - nrect.height - pad;
+        const x = Math.max(pad, Math.random()*maxX);
+        const y = Math.max(pad, Math.random()*maxY);
+        noBtn.style.position = 'absolute';
+        noBtn.style.left = x + 'px';
+        noBtn.style.top  = y + 'px';
+      };
+      noBtn.addEventListener('mouseenter', moveAway);
+      noBtn.addEventListener('mousemove', moveAway);
+      noBtn.addEventListener('touchstart', (e)=>{ e.preventDefault(); moveAway(e); }, {passive:false});
+    }
+
+    // Confetti celebration
+    function celebration(){
+      const canvas = document.getElementById('confetti');
+      const ctx = canvas.getContext('2d');
+      let W = canvas.width = window.innerWidth;
+      let H = canvas.height = window.innerHeight;
+
+      const pieces = Array.from({length: 160}, ()=>({
+        x: Math.random()*W,
+        y: Math.random()*H - H,
+        r: 2 + Math.random()*5,
+        a: Math.random()*Math.PI*2,
+        vy: 2 + Math.random()*3,
+        vx: -1 + Math.random()*2
+      }));
+
+      function draw(){
+        ctx.clearRect(0,0,W,H);
+        pieces.forEach(p=>{
+          p.y += p.vy; p.x += p.vx; p.a += 0.02;
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.a);
+          ctx.fillStyle = `hsl(${(p.x/W)*360}, 80%, 60%)`;
+          ctx.fillRect(-p.r/2, -p.r/2, p.r, p.r);
+          ctx.restore();
+        });
+      }
+      let frames = 0;
+      const id = setInterval(()=>{
+        draw(); frames++; if(frames>240) clearInterval(id);
+      }, 16);
+      window.addEventListener('resize', ()=>{
+        W = canvas.width = window.innerWidth;
+        H = canvas.height = window.innerHeight;
+      });
+    }
+  </script>
+</body>
+</html>
